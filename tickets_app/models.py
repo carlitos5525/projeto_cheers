@@ -15,3 +15,6 @@ class Ticket(models.Model):
     def __str__(self):
         return self.event_name
     
+    class Meta:
+        ordering = ['creation_date']
+        
