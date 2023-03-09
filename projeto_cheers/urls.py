@@ -20,7 +20,7 @@ import tickets_app
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('ticket/', include('tickets_app.api.urls')),
+    path('ingresso/', include('tickets_app.api.urls')),
     path('api-auth/', include('rest_framework.urls'))
 
 ]

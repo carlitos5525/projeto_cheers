@@ -1,3 +1,4 @@
+from datetime import date
 from tickets_app.api.serializers import TicketSerializer
 from tickets_app.models import Ticket
 from rest_framework.response import Response
@@ -11,7 +12,12 @@ def tickets_list(request):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def ticket_details(request, id):
-    ticket = Ticket.objects.get(pk=id)
+    
+    try:
+        ticket = Ticket.objects.get(pk=id)
+    except Ticket.DoesNotExist:
+        return Response("404")
+    
     
     if request.method == 'GET':
         serializer = TicketSerializer(ticket)
@@ -28,8 +34,7 @@ def ticket_details(request, id):
     if request.method == 'DELETE':
         ticket.delete()
         return Response()
-
-
+    
 @api_view(['POST'])
 def ticket_create(request):
     serializer = TicketSerializer(data=request.data)
@@ -38,6 +43,21 @@ def ticket_create(request):
         return Response(serializer.data)
     else:
         return Response(serializer.errors)
+    
+@api_view(['POST'])
+def ticket_sale(request, id):
+    try:
+        ticket = Ticket.objects.get(pk=id)
+    except Ticket.DoesNotExist:
+        return Response("404")
+    
+    ticket.is_sold = True
+    ticket.is_available = False
+    ticket.sold_at = date.today()
+    ticket.save()
+    
+    serializer = TicketSerializer(ticket)
+    return Response(serializer.data)
     
 
     
