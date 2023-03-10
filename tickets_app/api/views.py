@@ -3,12 +3,40 @@ from tickets_app.api.serializers import TicketSerializer
 from tickets_app.models import Ticket
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework import status
+from rest_framework.generics import GenericAPIView
+
+
+#class TicketViewSet(GenericAPIView):
+#    serializer_class = TicketSerializer
+#
+#    def get_queryset(self):
+#        queryset = Ticket.objects.all().order_by('-created_at').filter(is_available=True)
+#        event_name_filter = self.request.query_params.get('event_name')
+ #       if event_name_filter is not None:
+#            queryset = queryset.filter(event_name=event_name_filter)
+ #       return queryset
 
 @api_view(['GET'])
 def tickets_list(request):
-    tickets = Ticket.objects.all().order_by('-created_at')
-    serializer = TicketSerializer(tickets, many=True)
-    return Response(serializer.data)
+    query_set = Ticket.objects.all().order_by('-created_at').filter(is_available=True)
+
+    query_params = request.query_params
+    if "event_name" in query_params:
+        event_name_filter = query_params['event_name']
+        query_set = query_set.filter(event_name__icontains=event_name_filter)
+            
+    if "price" in query_params:
+        price_filter = query_params['price']
+        query_set = query_set.filter(price=price_filter)
+        
+    if"created_at" in query_params:
+        created_at_filter = query_params['created_at']
+        query_set = query_set.filter(created_at__date=created_at_filter)
+        
+    serializer = TicketSerializer(query_set, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def ticket_details(request, id):
@@ -16,40 +44,40 @@ def ticket_details(request, id):
     try:
         ticket = Ticket.objects.get(pk=id)
     except Ticket.DoesNotExist:
-        return Response("404")
+        return Response(status=status.HTTP_404_NOT_FOUND)
     
     
     if request.method == 'GET':
         serializer = TicketSerializer(ticket)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     if request.method == 'PUT':
         serializer = TicketSerializer(ticket, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     if request.method == 'DELETE':
         ticket.delete()
-        return Response()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 @api_view(['POST'])
 def ticket_create(request):
     serializer = TicketSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
-        return Response(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 @api_view(['POST'])
 def ticket_sale(request, id):
     try:
         ticket = Ticket.objects.get(pk=id)
     except Ticket.DoesNotExist:
-        return Response("404")
+        return Response(status=status.HTTP_404_NOT_FOUND)
     
     ticket.is_sold = True
     ticket.is_available = False
@@ -57,7 +85,7 @@ def ticket_sale(request, id):
     ticket.save()
     
     serializer = TicketSerializer(ticket)
-    return Response(serializer.data)
+    return Response(serializer.data, status=status.HTTP_200_OK)
     
 
     
