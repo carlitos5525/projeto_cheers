@@ -1,8 +1,8 @@
 from rest_framework import serializers
-
 from tickets_app.models import Ticket
 
 class TicketSerializer(serializers.Serializer):
+    
     
     id = serializers.IntegerField(read_only=True)
     is_available = serializers.BooleanField(read_only=True)
@@ -12,6 +12,9 @@ class TicketSerializer(serializers.Serializer):
     description = serializers.CharField(required=False, allow_blank=True)
     created_at = serializers.DateTimeField(read_only=True)
     sold_at = serializers.DateField(read_only=True)
+    seller_id = serializers.PrimaryKeyRelatedField(read_only=True)
+    buyer_id = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     
     def create(self, validated_data):
        return Ticket.objects.create(**validated_data)
@@ -23,3 +26,4 @@ class TicketSerializer(serializers.Serializer):
         instance.save()
         return instance
         
+

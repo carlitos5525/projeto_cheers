@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from profile_app.models import User
 
 # Create your models here.
 class Ticket(models.Model):
@@ -11,6 +12,9 @@ class Ticket(models.Model):
     description = models.CharField(max_length=300, default="", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     sold_at = models.DateField(blank=True, null=True)
+    seller_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller_tickets", blank=True, null=True)
+    buyer_id = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="buyer_tickets", blank=True, null=True)
+    
     
     def __str__(self):
         return self.event_name

@@ -7,16 +7,6 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 
 
-#class TicketViewSet(GenericAPIView):
-#    serializer_class = TicketSerializer
-#
-#    def get_queryset(self):
-#        queryset = Ticket.objects.all().order_by('-created_at').filter(is_available=True)
-#        event_name_filter = self.request.query_params.get('event_name')
- #       if event_name_filter is not None:
-#            queryset = queryset.filter(event_name=event_name_filter)
- #       return queryset
-
 @api_view(['GET'])
 def tickets_list(request):
     query_set = Ticket.objects.all().order_by('-created_at').filter(is_available=True)
@@ -86,8 +76,4 @@ def ticket_sale(request, id):
     
     serializer = TicketSerializer(ticket)
     return Response(serializer.data, status=status.HTTP_200_OK)
-    
-
-    
-
     
