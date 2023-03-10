@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'tickets_app',
     'rest_framework',
+    'profile_app'
 ]
 
 MIDDLEWARE = [
@@ -123,3 +124,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'profile_app.User'
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALL_CREDENTIALS = True
