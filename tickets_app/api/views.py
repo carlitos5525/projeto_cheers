@@ -2,9 +2,10 @@ from datetime import date
 from tickets_app.api.serializers import TicketSerializer
 from tickets_app.models import Ticket
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly 
+from tickets_app.api.permissions import TicketUserOrRearOnly
 
 
 @api_view(['GET'])
@@ -29,6 +30,7 @@ def tickets_list(request):
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([TicketUserOrRearOnly ])
 def ticket_details(request, id):
     
     try:
@@ -54,15 +56,21 @@ def ticket_details(request, id):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def ticket_create(request):
     serializer = TicketSerializer(data=request.data)
+    
+    seller = request.user
+    
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(seller_id=seller)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def ticket_sale(request, id):
     try:
         ticket = Ticket.objects.get(pk=id)
